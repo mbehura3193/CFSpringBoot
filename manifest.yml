@@ -1,0 +1,8 @@
+name: SpringPostgreSQL
+path: target/springpostgresql-0.0.1-SNAPSHOT.jar
+buildpack: https://github.com/cloudfoundry/java-buildpack.git
+memory: 1G
+services:
+  - mypostgresql
+env:
+  spring_jpa_hibernate_ddl-auto: update
