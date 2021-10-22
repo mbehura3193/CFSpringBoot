@@ -1,0 +1,37 @@
+---
+applications:
+- name: connectivity-appliance-provisioning-sit3
+  buildpack: dicf_java_buildpack_latest
+  timeout: 180
+  memory: 2048M
+  instances: 1
+  routes:
+    - route: connectivity-appliance-provisioning-sit3.r1.pcf.dell.com
+  path: connectivity-appliance-provisioning.jar
+  services:
+    - ESRS-GEN4-NONLDAP
+  env:
+    SPRING_PROFILES_ACTIVE: cloud
+    APP_NAME: connectivity-appliance-provisioning-sit3
+    APM_SERVER_NAME: r1.pcf.dell.com
+    APM_PORT: 5443
+    APM_SSL_DEFAULT: com.wily.isengard.postofficehub.link.net.SSLSocketFactory
+    DIGITALTWIN_SVC_URL: https://srsgen4-dtp-request-handler-sit3.r1.pcf.dell.com/srs/digitaltwin/request
+    ELMS_SWID_URL: https://swidgenerationService-sit3.r1.pcf.dell.com/srs/generate/swid
+    GEN4_DEVICEKEY_URL: https://srsgen4-devicekey-cloud-service-v2-sit3.r1.pcf.dell.com
+    queryNextSeqPcInstallRequest: SELECT esrs.SEQ_PC_INSTALL_REQUEST.NEXTVAL REQUEST_ID from dual
+    queryInsertSoftwareRequestInfo: insert into esrs.PC_INSTALL_REQUEST (INSTALL_REQUEST_ID,CUSTOMER_ID,SERIAL_NUMBER ,REQUEST_TYPE,REQUEST_DATE,VERSION,ACCESS_KEY_ID ) values (:INSTALL_REQUEST_ID,:CUSTOMER_ID,:SERIAL_NUMBER ,:REQUEST_TYPE,:REQUEST_DATE,:VERSION,:ACCESS_KEY_ID)
+    queryUpdateCertIssued: update esrs.PC_INSTALL_REQUEST set CERT_ISSUED='YES' where SERIAL_NUMBER=:srlnum
+    queryPcConfigData: select CONFIG_NAME,CONFIG_VALUE from PC_Config
+    queryEsrsConfigData: select CONFIG_NAME,CONFIG_VALUE from ESRS_Config
+    queryInsertGWSN: INSERT INTO EMC_GATEWAY_SERIALNUMBER(EMC_SERIAL_NUMBER,CSI_SERIAL_NUMBER,PARTY_NUMBER,INSTALL_DUNS) VALUES(:serialNumber,:serialNumber,:siteId,:installDuns)
+    querySiteDetails: select * from ESRS.PARTY where PARTY_NUMBER=:siteId
+    queryisiPartner: SELECT U.user_id FROM SRS4.SRS_USERS U,SRS4.user_groups UG WHERE U.USER_ID=:UD and U.user_id = UG.user_id and UG.GROUP_ID = '11'
+    queryisASPPartner: SELECT U.user_id FROM SRS4.SRS_USERS U,SRS4.user_groups UG WHERE U.USER_ID=:UD and U.user_id = UG.user_id and UG.GROUP_ID = '8'
+    queryForGDuns: SELECT GDUNS FROM SRS4.SRS_USERS WHERE USER_ID=:UD
+    queryGetGdunsForIpartner: SELECT U.GDUNS FROM SRS4.SRS_USERS U,SRS4.user_groups G WHERE U.USER_ID = G.USER_ID AND U.USER_ID = :UD AND G.GROUP_ID = '11' AND NOT EXISTS(SELECT * FROM USER_GROUPS UG WHERE U.USER_ID = UG.USER_ID AND UG.GROUP_ID = '8')
+    queryInsertSaeRegistartionDetails: INSERT INTO SRS4.SAE_REGISTRATION_DETAILS (SERIAL_NUMBER, VERSION, REGISTRATION_ID, REGISTRATION_STATUS, IP_ADDRESS, GATEWAYMODEL, CREATED_DATE, MODIFIED_DATE) VALUES (upper(:serialNumber), :version, :registrationId, :registrationStatus, :ipAddress, upper(:model),:createdDate,:modifiedDate)
+    queryUpdateSaeRegistartionDetails: Update SRS4.SAE_REGISTRATION_DETAILS set REGISTRATION_ID=:registrationId, REGISTRATION_STATUS='200-SAE-SRS-Reg', MODIFIED_DATE=:modifiedDate where  SERIAL_NUMBER=:serialNumber
+    queryUpdateVersion: Update SRS4.SAE_REGISTRATION_DETAILS set VERSION=:version , MODIFIED_DATE=:modifiedDate where  REGISTRATION_ID=:registrationId
+    queryRegistartionId: select REGISTRATION_ID,VERSION,GATEWAYMODEL from SRS4.SAE_REGISTRATION_DETAILS where SERIAL_NUMBER=upper(:serialNumber)
+    queryFetchGatewayModelRecord: SELECT * FROM SRS4.GATEWAY_MODELS WHERE upper(model) = upper(:model)
